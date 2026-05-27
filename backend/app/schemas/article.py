@@ -60,3 +60,30 @@ class ArticleUpdate(BaseModel):
 
     priority: int | None = None
 
+
+class BulkIds(BaseModel):
+    ids: list[int]
+
+
+class BulkStatusUpdate(BaseModel):
+    ids: list[int]
+    status: str
+
+
+class BulkDeleteResult(BaseModel):
+    deleted_count: int
+
+
+class BulkUpdateResult(BaseModel):
+    updated_count: int
+
+
+class CsvFailedRow(BaseModel):
+    row_number: int
+    reason: str
+
+
+class CsvImportResult(BaseModel):
+    imported_count: int
+    skipped_count: int
+    failed_rows: list[CsvFailedRow]
