@@ -1,0 +1,5 @@
+curl -X PATCH "http://127.0.0.1:8000/articles/1" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "notes": "Must revisit distributed systems section"
+  }'

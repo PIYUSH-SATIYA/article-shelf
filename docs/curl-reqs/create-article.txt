@@ -1,0 +1,12 @@
+curl -X POST "http://127.0.0.1:8000/articles" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Interesting distributed systems article",
+    "url": "https://example.com/distributed-systems",
+    "reason": "Useful for understanding consistency",
+    "notes": "Read before designing sync engine",
+    "tags": ["distributed-systems", "backend", "architecture"],
+    "source": "Hacker News",
+    "status": "inbox",
+    "priority": 2
+  }'
