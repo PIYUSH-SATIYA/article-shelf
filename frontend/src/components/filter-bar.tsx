@@ -90,10 +90,10 @@ export function FilterBar() {
         <div style={{
           display: 'flex', alignItems: 'center', gap: 4,
           padding: '4px 8px 4px 10px',
-          background: 'var(--accent-muted)',
-          border: '1px solid var(--accent-muted-border)',
+          background: 'var(--amber-dim)',
+          border: '1px solid var(--amber)',
           borderRadius: 'var(--radius-md)',
-          fontSize: 12, color: 'var(--accent-text)',
+          fontSize: 12, color: 'var(--amber-text)',
         }}>
           <span>#{tag}</span>
           <button

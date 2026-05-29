@@ -11,7 +11,7 @@ import { ArticleDialog }   from '@/components/article-dialog'
 import { CommandPalette }  from '@/components/command-palette'
 import { Toast }           from '@/components/toast'
 import type { ListParams } from '@/api/types'
-import { Library, Menu, X } from 'lucide-react'
+import { Library, Menu, Plus } from 'lucide-react'
 
 export default function App() {
   const search    = useStore((s) => s.search)
@@ -127,7 +127,7 @@ export default function App() {
           </button>
           <div className="mobile-logo">
             <div className="sidebar-logo-icon" style={{ width: 24, height: 24 }}>
-              <Library size={12} color="#fff" />
+              <Library size={12} color="#0B0B0B" />
             </div>
             Shelf
           </div>
@@ -138,7 +138,7 @@ export default function App() {
             aria-label="New article"
             title="New article (N)"
           >
-            <X size={20} style={{ display: 'none' }} />
+            <Plus size={20} />
           </button>
         </header>
 

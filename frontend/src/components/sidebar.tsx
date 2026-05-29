@@ -98,7 +98,7 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
       <div className="sidebar-logo-wrap">
         <div className="sidebar-logo">
           <div className="sidebar-logo-icon">
-            <Library size={14} color="#fff" />
+            <Library size={14} color="#0B0B0B" />
           </div>
           <span className="sidebar-logo-text">Shelf</span>
           {/* Mobile close button */}

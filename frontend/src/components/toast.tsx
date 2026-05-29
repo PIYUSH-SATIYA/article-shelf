@@ -13,8 +13,8 @@ export function Toast() {
         <div key={t.id} className={`toast ${t.type === 'error' ? 'error' : ''}`}>
           <span className="toast-icon">
             {t.type === 'error'
-              ? <AlertCircle size={14} style={{ color: 'var(--danger)' }} />
-              : <CheckCircle size={14} style={{ color: 'var(--success)' }} />
+              ? <AlertCircle size={14} style={{ color: 'var(--red)' }} />
+              : <CheckCircle size={14} style={{ color: 'var(--green)' }} />
             }
           </span>
           <span className="toast-msg">{t.message}</span>

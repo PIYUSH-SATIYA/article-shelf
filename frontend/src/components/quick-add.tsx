@@ -2,11 +2,7 @@ import { Plus } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { useCreateArticle } from '@/hooks/use-articles'
 import { useStore } from '@/store'
-
-function guessTitle(url: string): string {
-  try { return new URL(url).hostname.replace(/^www\./, '') }
-  catch { return url.slice(0, 80) }
-}
+import { normalizeUrl, guessTitle } from '@/lib/url'
 
 export function QuickAdd() {
   const urlRef = useRef<HTMLInputElement>(null)
@@ -18,13 +14,15 @@ export function QuickAdd() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const trimmedUrl = url.trim()
-    if (!trimmedUrl) return
+    const raw = url.trim()
+    if (!raw) return
+
+    const finalUrl = normalizeUrl(raw)
 
     try {
       await createArticle({
-        url: trimmedUrl,
-        title: guessTitle(trimmedUrl),
+        url: finalUrl,
+        title: guessTitle(finalUrl),
         status: 'inbox',
         priority: 3,
       })
@@ -40,13 +38,12 @@ export function QuickAdd() {
 
   return (
     <div className="quick-add-wrap">
-      {/* Fast URL capture */}
       <form onSubmit={handleSubmit} className="quick-add-form">
         <input
           ref={urlRef}
           id="quick-add-url"
-          type="url"
-          placeholder="Paste a URL to quick-save to inbox…"
+          type="text"
+          placeholder="Paste a URL to quick-save…"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           className="quick-add-input"
@@ -61,7 +58,6 @@ export function QuickAdd() {
         </button>
       </form>
 
-      {/* Full form "New Article" button */}
       <button
         type="button"
         onClick={openCreateDialog}

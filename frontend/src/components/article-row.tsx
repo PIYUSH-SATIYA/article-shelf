@@ -4,19 +4,19 @@ import { useDeleteArticle, useUpdateArticle } from '@/hooks/use-articles'
 import { useStore } from '@/store'
 import type { Article } from '@/api/types'
 
-const STATUS_LABELS: Record<string, string> = {
-  inbox: 'Inbox', unread: 'Unread', reading: 'Reading', done: 'Done', archived: 'Archived',
+const STATUS_COLORS: Record<string, string> = {
+  inbox: 'var(--s-inbox)', unread: 'var(--s-unread)',
+  reading: 'var(--s-reading)', done: 'var(--s-done)',
+  archived: 'var(--s-archived)',
 }
 
 const PRIORITY_COLORS: Record<number, string> = {
-  1: 'var(--priority-1)', 2: 'var(--priority-2)', 3: 'var(--priority-3)',
-  4: 'var(--priority-4)', 5: 'var(--priority-5)',
+  1: 'var(--p-1)', 2: 'var(--p-2)', 3: 'var(--p-3)',
+  4: 'var(--p-4)', 5: 'var(--p-5)',
 }
 
 function relativeDate(dateStr: string): string {
-  const now = Date.now()
-  const then = new Date(dateStr).getTime()
-  const diff = Math.floor((now - then) / 1000)
+  const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000)
   if (diff < 60)  return 'now'
   if (diff < 3600) return `${Math.floor(diff / 60)}m`
   if (diff < 86400) return `${Math.floor(diff / 3600)}h`
@@ -45,28 +45,20 @@ export function ArticleRow({ article, isSelected }: ArticleRowProps) {
   const { mutateAsync: updateArticle } = useUpdateArticle(article.id)
   const { mutateAsync: deleteArticle } = useDeleteArticle()
 
-  const priorityColor = PRIORITY_COLORS[article.priority] ?? 'var(--text-tertiary)'
-  const statusLabel   = STATUS_LABELS[article.status] ?? article.status
+  const priorityColor = PRIORITY_COLORS[article.priority] ?? 'var(--text-3)'
+  const statusColor   = STATUS_COLORS[article.status] ?? 'var(--text-3)'
 
   const handleArchive = async (e: React.MouseEvent) => {
     e.stopPropagation(); e.preventDefault()
-    try {
-      await updateArticle({ status: 'archived' })
-      addToast('Archived')
-    } catch {
-      addToast('Failed to archive', 'error')
-    }
+    try { await updateArticle({ status: 'archived' }); addToast('Archived') }
+    catch { addToast('Failed to archive', 'error') }
   }
 
   const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation(); e.preventDefault()
     if (!window.confirm(`Delete "${article.title}"?`)) return
-    try {
-      await deleteArticle(article.id)
-      addToast('Deleted')
-    } catch {
-      addToast('Failed to delete', 'error')
-    }
+    try { await deleteArticle(article.id); addToast('Deleted') }
+    catch { addToast('Failed to delete', 'error') }
     setMenuOpen(false)
   }
 
@@ -92,72 +84,65 @@ export function ArticleRow({ article, isSelected }: ArticleRowProps) {
         />
       </div>
 
-      {/* Title + domain */}
-      <div className="article-row-title-wrap">
-        <div className={`article-row-title ${article.status === 'archived' ? 'archived' : ''}`}>
-          {article.title}
+      {/* Status dot */}
+      <span className={`article-status-dot ${article.status}`} title={article.status} />
+
+      {/* Content */}
+      <div className="article-row-content">
+        <div className="article-row-top">
+          <span className={`article-row-title ${article.status === 'archived' ? 'archived' : ''}`}>
+            {article.title}
+          </span>
+          <span
+            className="article-row-priority"
+            style={{ color: priorityColor, borderColor: priorityColor + '33' }}
+          >
+            P{article.priority}
+          </span>
         </div>
-        <div className="article-row-domain">{getDomain(article.url)}</div>
+        <div className="article-row-bottom">
+          <span className="article-row-domain">{getDomain(article.url)}</span>
+          {(article.tags ?? []).length > 0 && (
+            <>
+              <span style={{ color: 'var(--border-strong)' }}>·</span>
+              <span className="article-row-tags">
+                {(article.tags ?? []).slice(0, 2).map((tag) => (
+                  <span key={tag} className="article-tag">{tag}</span>
+                ))}
+                {(article.tags ?? []).length > 2 && (
+                  <span className="article-tag-more">+{(article.tags ?? []).length - 2}</span>
+                )}
+              </span>
+            </>
+          )}
+          <span style={{ color: 'var(--border-strong)' }}>·</span>
+          <span className="article-row-status-text" style={{ color: statusColor }}>
+            {article.status}
+          </span>
+        </div>
       </div>
-
-      {/* Tags */}
-      <div className="article-row-tags col-tags">
-        {(article.tags ?? []).slice(0, 2).map((tag) => (
-          <span key={tag} className="article-tag">{tag}</span>
-        ))}
-        {(article.tags ?? []).length > 2 && (
-          <span className="article-tag-more">+{(article.tags ?? []).length - 2}</span>
-        )}
-      </div>
-
-      {/* Status badge */}
-      <span className={`status-badge ${article.status}`}>{statusLabel}</span>
-
-      {/* Priority */}
-      <span className="priority-cell col-priority" style={{ color: priorityColor }}>
-        P{article.priority}
-      </span>
 
       {/* Date */}
-      <span className="date-cell col-date">{relativeDate(article.created_at)}</span>
+      <span className="article-row-date">{relativeDate(article.created_at)}</span>
 
-      {/* Row actions */}
+      {/* Actions */}
       <div className="article-row-actions">
-        <button
-          type="button"
-          title="Edit"
-          className="icon-btn"
-          onClick={(e) => { e.stopPropagation(); e.preventDefault(); openEditDialog(article.id) }}
-        >
+        <button type="button" title="Edit" className="icon-btn"
+          onClick={(e) => { e.stopPropagation(); e.preventDefault(); openEditDialog(article.id) }}>
           <Pencil size={13} />
         </button>
-        <button
-          type="button"
-          title="Archive"
-          className="icon-btn"
-          onClick={handleArchive}
-        >
+        <button type="button" title="Archive" className="icon-btn" onClick={handleArchive}>
           <Archive size={13} />
         </button>
         <div className="row-menu-wrap">
-          <button
-            type="button"
-            title="More"
-            className="icon-btn"
-            onClick={(e) => { e.stopPropagation(); e.preventDefault(); setMenuOpen(!menuOpen) }}
-          >
+          <button type="button" title="More" className="icon-btn"
+            onClick={(e) => { e.stopPropagation(); e.preventDefault(); setMenuOpen(!menuOpen) }}>
             <MoreHorizontal size={13} />
           </button>
           {menuOpen && (
-            <div
-              className="row-menu-popup"
-              onClick={(e) => { e.stopPropagation(); e.preventDefault() }}
-            >
-              <button
-                type="button"
-                className="menu-action-btn danger"
-                onClick={handleDelete}
-              >
+            <div className="row-menu-popup"
+              onClick={(e) => { e.stopPropagation(); e.preventDefault() }}>
+              <button type="button" className="menu-action-btn danger" onClick={handleDelete}>
                 <Trash2 size={12} /> Delete
               </button>
             </div>
