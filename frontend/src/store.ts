@@ -38,7 +38,8 @@ export type UIStore = {
   // Article dialog (centered, create + edit)
   dialogMode: DialogMode
   editingArticleId: number | null
-  openCreateDialog: () => void
+  initialUrl: string
+  openCreateDialog: (url?: string) => void
   openEditDialog: (id: number) => void
   closeDialog: () => void
 
@@ -92,9 +93,10 @@ export const useStore = create<UIStore>((set) => ({
   // Article dialog
   dialogMode: null,
   editingArticleId: null,
-  openCreateDialog: () => set({ dialogMode: 'create', editingArticleId: null }),
-  openEditDialog: (id) => set({ dialogMode: 'edit', editingArticleId: id }),
-  closeDialog: () => set({ dialogMode: null, editingArticleId: null }),
+  initialUrl: '',
+  openCreateDialog: (url = '') => set({ dialogMode: 'create', editingArticleId: null, initialUrl: url }),
+  openEditDialog: (id) => set({ dialogMode: 'edit', editingArticleId: id, initialUrl: '' }),
+  closeDialog: () => set({ dialogMode: null, editingArticleId: null, initialUrl: '' }),
 
   // Command palette
   paletteOpen: false,

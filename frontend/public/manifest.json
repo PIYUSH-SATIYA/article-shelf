@@ -1,0 +1,24 @@
+{
+  "name": "Shelf",
+  "short_name": "Shelf",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0B0B0B",
+  "theme_color": "#C8962E",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml"
+    }
+  ],
+  "share_target": {
+    "action": "/?action=share",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
+}

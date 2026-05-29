@@ -28,6 +28,7 @@ type FormState = {
 export function ArticleDialog() {
   const dialogMode  = useStore((s) => s.dialogMode)
   const editingId   = useStore((s) => s.editingArticleId)
+  const initialUrl  = useStore((s) => s.initialUrl)
   const closeDialog = useStore((s) => s.closeDialog)
   const addToast    = useStore((s) => s.addToast)
 
@@ -56,8 +57,8 @@ export function ArticleDialog() {
   }, [isEdit, article])
 
   useEffect(() => {
-    if (isCreate) { setForm(EMPTY); setDirty(false); setTimeout(() => urlInputRef.current?.focus(), 80) }
-  }, [isCreate])
+    if (isCreate) { setForm({ ...EMPTY, url: initialUrl }); setDirty(false); setTimeout(() => urlInputRef.current?.focus(), 80) }
+  }, [isCreate, initialUrl])
 
   useEffect(() => {
     if (isEdit && article) setTimeout(() => titleInputRef.current?.focus(), 80)

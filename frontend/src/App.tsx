@@ -62,6 +62,24 @@ export default function App() {
     window.history.replaceState(null, '', str ? `?${str}` : window.location.pathname)
   }, [deferredSearch, status, priority, tag, sortBy, order, limit, page])
 
+  // Handle PWA Web Share Target
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search)
+    if (searchParams.get('action') === 'share') {
+      const url = searchParams.get('url') || searchParams.get('text') || ''
+      if (url) {
+        useStore.getState().openCreateDialog(url)
+      }
+      
+      const urlObj = new URL(window.location.href)
+      urlObj.searchParams.delete('action')
+      urlObj.searchParams.delete('url')
+      urlObj.searchParams.delete('text')
+      urlObj.searchParams.delete('title')
+      window.history.replaceState(null, '', urlObj.search ? `?${urlObj.searchParams.toString()}` : window.location.pathname)
+    }
+  }, [])
+
   // Global keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
