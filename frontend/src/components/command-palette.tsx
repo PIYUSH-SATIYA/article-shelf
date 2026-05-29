@@ -91,7 +91,7 @@ export function CommandPalette() {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search articles or run a command…"
+            placeholder="Search articles, notes, or run a command…"
             className="palette-input"
           />
           {query && (

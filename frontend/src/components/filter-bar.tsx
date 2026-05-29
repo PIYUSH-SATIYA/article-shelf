@@ -44,7 +44,7 @@ export function FilterBar() {
           ref={searchRef}
           id="filter-search"
           type="search"
-          placeholder="Search…"
+          placeholder="Search title, notes, reason..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />

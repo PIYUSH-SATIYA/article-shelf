@@ -30,6 +30,31 @@ function getDomain(url: string): string {
   catch { return url }
 }
 
+function getSnippet(text: string | null | undefined, query: string): React.ReactNode {
+  if (!text || !query) return null
+  const lowerText = text.toLowerCase()
+  const lowerQuery = query.toLowerCase()
+  const index = lowerText.indexOf(lowerQuery)
+  if (index === -1) return null
+
+  const start = Math.max(0, index - 30)
+  const end = Math.min(text.length, index + query.length + 30)
+  const prefix = start > 0 ? '…' : ''
+  const suffix = end < text.length ? '…' : ''
+  
+  const before = text.slice(start, index)
+  const match = text.slice(index, index + query.length)
+  const after = text.slice(index + query.length, end)
+
+  return (
+    <>
+      {prefix}{before}
+      <span style={{ color: 'var(--amber)', fontWeight: 500 }}>{match}</span>
+      {after}{suffix}
+    </>
+  )
+}
+
 interface ArticleRowProps {
   article: Article
   isSelected: boolean
@@ -41,6 +66,7 @@ export function ArticleRow({ article, isSelected }: ArticleRowProps) {
   const openEditDialog = useStore((s) => s.openEditDialog)
   const toggleSelect   = useStore((s) => s.toggleSelect)
   const addToast       = useStore((s) => s.addToast)
+  const search         = useStore((s) => s.search)
 
   const { mutateAsync: updateArticle } = useUpdateArticle(article.id)
   const { mutateAsync: deleteArticle } = useDeleteArticle()
@@ -60,6 +86,20 @@ export function ArticleRow({ article, isSelected }: ArticleRowProps) {
     try { await deleteArticle(article.id); addToast('Deleted') }
     catch { addToast('Failed to delete', 'error') }
     setMenuOpen(false)
+  }
+
+  let matchContext: React.ReactNode = null
+  if (search.trim()) {
+    const q = search.trim().toLowerCase()
+    if (article.reason && article.reason.toLowerCase().includes(q)) {
+      matchContext = <span className="article-row-match">Reason: {getSnippet(article.reason, q)}</span>
+    } else if (article.notes && article.notes.toLowerCase().includes(q)) {
+      matchContext = <span className="article-row-match">Note: {getSnippet(article.notes, q)}</span>
+    } else if (article.source && article.source.toLowerCase().includes(q)) {
+      matchContext = <span className="article-row-match">Source: {getSnippet(article.source, q)}</span>
+    } else if (article.tags && article.tags.some(t => t.toLowerCase().includes(q))) {
+      matchContext = <span className="article-row-match">Tag match</span>
+    }
   }
 
   return (
@@ -120,6 +160,7 @@ export function ArticleRow({ article, isSelected }: ArticleRowProps) {
             {article.status}
           </span>
         </div>
+        {matchContext}
       </div>
 
       {/* Date */}
