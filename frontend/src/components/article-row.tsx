@@ -1,4 +1,4 @@
-import { Archive, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
+import { Archive, ChevronDown, ChevronRight, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { useDeleteArticle, useUpdateArticle } from '@/hooks/use-articles'
 import { useStore } from '@/store'
@@ -102,19 +102,28 @@ export function ArticleRow({ article, isSelected }: ArticleRowProps) {
     }
   }
 
+  const [isExpanded, setIsExpanded] = useState(false)
+  const hasDetails = Boolean(article.reason || article.notes)
+
+  const handleRowClick = (e: React.MouseEvent) => {
+    // If clicking a button, input, or link, don't navigate
+    const target = e.target as HTMLElement
+    if (target.closest('button, input, a, .article-row-expanded')) return
+    window.open(article.url, '_blank', 'noopener,noreferrer')
+  }
+
   return (
-    <a
-      href={article.url}
-      target="_blank"
-      rel="noreferrer"
+    <div
+      onClick={handleRowClick}
       onMouseLeave={() => setMenuOpen(false)}
-      className={`article-row ${isSelected ? 'selected' : ''}`}
+      className={`article-row ${isSelected ? 'selected' : ''} ${isExpanded ? 'expanded' : ''}`}
     >
-      {/* Checkbox */}
-      <div
-        className="article-row-check"
-        onClick={(e) => { e.stopPropagation(); e.preventDefault(); toggleSelect(article.id) }}
-      >
+      <div className="article-row-main">
+        {/* Checkbox */}
+        <div
+          className="article-row-check"
+          onClick={(e) => { e.stopPropagation(); e.preventDefault(); toggleSelect(article.id) }}
+        >
         <input
           type="checkbox"
           checked={isSelected}
@@ -130,9 +139,15 @@ export function ArticleRow({ article, isSelected }: ArticleRowProps) {
       {/* Content */}
       <div className="article-row-content">
         <div className="article-row-top">
-          <span className={`article-row-title ${article.status === 'archived' ? 'archived' : ''}`}>
+          <a
+            href={article.url}
+            target="_blank"
+            rel="noreferrer"
+            className={`article-row-title ${article.status === 'archived' ? 'archived' : ''}`}
+            onClick={(e) => e.stopPropagation()}
+          >
             {article.title}
-          </span>
+          </a>
           <span
             className="article-row-priority"
             style={{ color: priorityColor, borderColor: priorityColor + '33' }}
@@ -168,6 +183,12 @@ export function ArticleRow({ article, isSelected }: ArticleRowProps) {
 
       {/* Actions */}
       <div className="article-row-actions">
+        {hasDetails && (
+          <button type="button" title="Toggle details" className="icon-btn"
+            onClick={(e) => { e.stopPropagation(); e.preventDefault(); setIsExpanded(!isExpanded) }}>
+            {isExpanded ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
+          </button>
+        )}
         <button type="button" title="Edit" className="icon-btn"
           onClick={(e) => { e.stopPropagation(); e.preventDefault(); openEditDialog(article.id) }}>
           <Pencil size={13} />
@@ -190,6 +211,25 @@ export function ArticleRow({ article, isSelected }: ArticleRowProps) {
           )}
         </div>
       </div>
-    </a>
+      </div>
+
+      {/* Expanded details */}
+      {isExpanded && hasDetails && (
+        <div className="article-row-expanded">
+          {article.reason && (
+            <div className="expanded-section">
+              <span className="expanded-label">Reason</span>
+              <p className="expanded-text">{article.reason}</p>
+            </div>
+          )}
+          {article.notes && (
+            <div className="expanded-section">
+              <span className="expanded-label">Notes</span>
+              <p className="expanded-text" style={{ whiteSpace: 'pre-wrap' }}>{article.notes}</p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   )
 }

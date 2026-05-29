@@ -94,12 +94,15 @@ def list_articles(
         stmt = stmt.where(Article.priority == priority)
 
     if search:
+        from sqlalchemy import cast, String
         stmt = stmt.where(
             or_(
                 Article.title.ilike(f"%{search}%"),
                 Article.reason.ilike(f"%{search}%"),
                 Article.notes.ilike(f"%{search}%"),
                 Article.source.ilike(f"%{search}%"),
+                Article.url.ilike(f"%{search}%"),
+                cast(Article.tags, String).ilike(f"%{search}%"),
             )
         )
 
