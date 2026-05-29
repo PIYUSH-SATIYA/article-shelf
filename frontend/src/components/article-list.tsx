@@ -40,6 +40,10 @@ export function ArticleList() {
     )
   }
 
+  const displayArticles = !status 
+    ? articles.filter(a => a.status !== 'archived') 
+    : articles
+
   return (
     <div className="article-list-wrap" role="list">
       {/* Subtle refetch indicator */}
@@ -57,7 +61,7 @@ export function ArticleList() {
           <Loader2 size={20} style={{ animation: 'spin 1s linear infinite', color: 'var(--amber)' }} />
           <p>Loading…</p>
         </div>
-      ) : articles.length === 0 ? (
+      ) : displayArticles.length === 0 ? (
         <div className="article-list-empty">
           <div className="article-list-empty-icon">
             <BookOpen size={22} />
@@ -66,7 +70,7 @@ export function ArticleList() {
           <span>Paste a URL above or press <kbd>N</kbd> to add your first article</span>
         </div>
       ) : (
-        articles.map((article) => (
+        displayArticles.map((article) => (
           <ArticleRow
             key={article.id}
             article={article}

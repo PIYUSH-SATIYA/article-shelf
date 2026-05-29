@@ -147,7 +147,7 @@ export default function App() {
           <FilterBar />
           <BulkToolbar />
           <ArticleList />
-          <Pagination total={articles.length} />
+          <Pagination total={(!status ? articles.filter(a => a.status !== 'archived') : articles).length} />
         </main>
       </div>
 

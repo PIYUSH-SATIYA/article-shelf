@@ -16,11 +16,11 @@ import { useStore } from '@/store'
 import type { Article } from '@/api/types'
 
 const STATUS_NAV = [
-  { value: '',         label: 'All',      icon: Library  },
-  { value: 'inbox',    label: 'Inbox',    icon: Inbox    },
-  { value: 'reading',  label: 'Reading',  icon: BookOpen },
-  { value: 'done',     label: 'Done',     icon: CheckCheck },
-  { value: 'archived', label: 'Archived', icon: Archive  },
+  { value: '', label: 'All', icon: Library },
+  { value: 'inbox', label: 'Inbox', icon: Inbox },
+  { value: 'reading', label: 'Reading', icon: BookOpen },
+  { value: 'done', label: 'Done', icon: CheckCheck },
+  { value: 'archived', label: 'Archived', icon: Archive },
 ] as const
 
 function extractTags(articles: Article[]): string[] {
@@ -39,13 +39,13 @@ interface SidebarProps {
 }
 
 export function Sidebar({ open = false, onClose }: SidebarProps) {
-  const status      = useStore((s) => s.status)
-  const tag         = useStore((s) => s.tag)
-  const setStatus   = useStore((s) => s.setStatus)
-  const setTag      = useStore((s) => s.setTag)
+  const status = useStore((s) => s.status)
+  const tag = useStore((s) => s.tag)
+  const setStatus = useStore((s) => s.setStatus)
+  const setTag = useStore((s) => s.setTag)
   const resetFilters = useStore((s) => s.resetFilters)
-  const addToast    = useStore((s) => s.addToast)
-  const importRef   = useRef<HTMLInputElement>(null)
+  const addToast = useStore((s) => s.addToast)
+  const importRef = useRef<HTMLInputElement>(null)
 
   const { data: allArticles = [] } = useArticles({
     limit: 1000,
