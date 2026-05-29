@@ -16,7 +16,6 @@ export function QuickAdd() {
 
   const { mutateAsync: createArticle, isPending } = useCreateArticle()
 
-  // Fast capture: URL only, press Enter → saves to inbox instantly
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const trimmedUrl = url.trim()
@@ -37,61 +36,26 @@ export function QuickAdd() {
     }
   }
 
+  const hasUrl = Boolean(url.trim())
+
   return (
-    <div style={{
-      display: 'flex', gap: 8, alignItems: 'center',
-    }}>
+    <div className="quick-add-wrap">
       {/* Fast URL capture */}
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          flex: 1,
-          display: 'flex', gap: 8, alignItems: 'center',
-          background: 'var(--bg-surface)',
-          border: '1px solid var(--border-subtle)',
-          borderRadius: 'var(--radius-lg)',
-          padding: '6px 8px',
-        }}
-      >
+      <form onSubmit={handleSubmit} className="quick-add-form">
         <input
           ref={urlRef}
           id="quick-add-url"
           type="url"
-          placeholder="Paste URL to quick-save…"
+          placeholder="Paste a URL to quick-save to inbox…"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
-          style={{
-            flex: 1,
-            background: 'var(--bg-elevated)',
-            border: '1px solid var(--border-default)',
-            borderRadius: 'var(--radius-md)',
-            padding: '7px 12px',
-            color: 'var(--text-primary)',
-            fontSize: 13,
-            fontFamily: 'var(--font-sans)',
-            outline: 'none',
-            transition: 'border-color 0.15s',
-          }}
-          onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--border-focus)' }}
-          onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--border-default)' }}
+          className="quick-add-input"
         />
         <button
           type="submit"
-          disabled={!url.trim() || isPending}
+          disabled={!hasUrl || isPending}
           title="Quick-save to inbox (Enter)"
-          style={{
-            display: 'flex', alignItems: 'center', gap: 4,
-            padding: '7px 12px',
-            background: url.trim() ? 'var(--accent)' : 'var(--bg-elevated)',
-            border: '1px solid',
-            borderColor: url.trim() ? 'var(--accent)' : 'var(--border-default)',
-            borderRadius: 'var(--radius-md)',
-            color: url.trim() ? '#fff' : 'var(--text-tertiary)',
-            fontSize: 12, fontWeight: 500, fontFamily: 'var(--font-sans)',
-            cursor: url.trim() && !isPending ? 'pointer' : 'not-allowed',
-            transition: 'background 0.15s, border-color 0.15s',
-            whiteSpace: 'nowrap',
-          }}
+          className={`btn-save ${hasUrl ? 'active' : ''}`}
         >
           {isPending ? 'Saving…' : '↵ Save'}
         </button>
@@ -102,23 +66,9 @@ export function QuickAdd() {
         type="button"
         onClick={openCreateDialog}
         title="Add article with details (N)"
-        style={{
-          display: 'flex', alignItems: 'center', gap: 6,
-          padding: '8px 16px',
-          background: 'var(--accent)',
-          border: '1px solid var(--accent)',
-          borderRadius: 'var(--radius-lg)',
-          color: '#fff',
-          fontSize: 13, fontWeight: 500, fontFamily: 'var(--font-sans)',
-          cursor: 'pointer',
-          whiteSpace: 'nowrap',
-          flexShrink: 0,
-          transition: 'background 0.15s',
-        }}
-        onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--accent-hover)' }}
-        onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--accent)' }}
+        className="btn-new"
       >
-        <Plus size={14} />
+        <Plus size={15} />
         New
       </button>
     </div>

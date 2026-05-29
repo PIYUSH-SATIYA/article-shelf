@@ -7,6 +7,7 @@ import {
   Library,
   Tag,
   Upload,
+  X,
 } from 'lucide-react'
 import { useRef } from 'react'
 import { articlesApi } from '@/api/articles'
@@ -32,16 +33,20 @@ function extractTags(articles: Article[]): string[] {
   return Array.from(tagSet).sort()
 }
 
-export function Sidebar() {
-  const status   = useStore((s) => s.status)
-  const tag      = useStore((s) => s.tag)
-  const setStatus = useStore((s) => s.setStatus)
-  const setTag    = useStore((s) => s.setTag)
-  const resetFilters = useStore((s) => s.resetFilters)
-  const addToast  = useStore((s) => s.addToast)
-  const importRef = useRef<HTMLInputElement>(null)
+interface SidebarProps {
+  open?: boolean
+  onClose?: () => void
+}
 
-  // Fetch all articles for sidebar counts + tag list (no filters)
+export function Sidebar({ open = false, onClose }: SidebarProps) {
+  const status      = useStore((s) => s.status)
+  const tag         = useStore((s) => s.tag)
+  const setStatus   = useStore((s) => s.setStatus)
+  const setTag      = useStore((s) => s.setTag)
+  const resetFilters = useStore((s) => s.resetFilters)
+  const addToast    = useStore((s) => s.addToast)
+  const importRef   = useRef<HTMLInputElement>(null)
+
   const { data: allArticles = [] } = useArticles({
     limit: 1000,
     sort_by: 'created_at',
@@ -81,50 +86,41 @@ export function Sidebar() {
     }
   }
 
+  const handleNavClick = (value: string) => {
+    if (value === '') resetFilters()
+    else setStatus(value)
+    onClose?.()
+  }
+
   return (
-    <aside
-      className="sidebar"
-      style={{
-        width: 'var(--sidebar-w)',
-        flexShrink: 0,
-        height: '100vh',
-        position: 'sticky',
-        top: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        background: 'var(--bg-surface)',
-        borderRight: '1px solid var(--border-subtle)',
-        overflow: 'hidden',
-      }}
-    >
+    <aside className={`sidebar ${open ? 'open' : ''}`}>
       {/* Logo */}
-      <div style={{
-        padding: '16px 16px 12px',
-        borderBottom: '1px solid var(--border-subtle)',
-        flexShrink: 0,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{
-            width: 26, height: 26,
-            background: 'var(--accent)',
-            borderRadius: 'var(--radius-sm)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
+      <div className="sidebar-logo-wrap">
+        <div className="sidebar-logo">
+          <div className="sidebar-logo-icon">
             <Library size={14} color="#fff" />
           </div>
-          <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
-            Shelf
-          </span>
+          <span className="sidebar-logo-text">Shelf</span>
+          {/* Mobile close button */}
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              className="sidebar-action-btn"
+              style={{ marginLeft: 'auto', width: 30, height: 30, padding: 0, justifyContent: 'center', display: 'flex', alignItems: 'center' }}
+              aria-label="Close sidebar"
+            >
+              <X size={16} />
+            </button>
+          )}
         </div>
       </div>
 
       {/* Nav */}
-      <div style={{ overflowY: 'auto', flex: 1, padding: '8px 0' }}>
+      <nav className="sidebar-nav">
         {/* Status nav */}
-        <div style={{ padding: '0 8px', marginBottom: 8 }}>
-          <p style={{ fontSize: 11, color: 'var(--text-tertiary)', padding: '4px 8px', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>
-            Library
-          </p>
+        <div className="sidebar-section">
+          <p className="sidebar-section-label">Library</p>
           {STATUS_NAV.map(({ value, label, icon: Icon }) => {
             const count = value === '' ? allCount : (counts[value] ?? 0)
             const isActive = status === value
@@ -132,46 +128,13 @@ export function Sidebar() {
               <button
                 key={value}
                 type="button"
-                onClick={() => {
-                  if (value === '') resetFilters()
-                  else setStatus(value)
-                }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  width: '100%',
-                  padding: '6px 8px',
-                  borderRadius: 'var(--radius-md)',
-                  border: 'none',
-                  background: isActive ? 'var(--bg-active)' : 'transparent',
-                  color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
-                  cursor: 'pointer',
-                  fontSize: 13,
-                  fontFamily: 'var(--font-sans)',
-                  fontWeight: isActive ? 500 : 400,
-                  transition: 'background 0.1s, color 0.1s',
-                  textAlign: 'left',
-                }}
-                onMouseEnter={(e) => {
-                  if (!isActive) (e.currentTarget as HTMLElement).style.background = 'var(--bg-hover)'
-                }}
-                onMouseLeave={(e) => {
-                  if (!isActive) (e.currentTarget as HTMLElement).style.background = 'transparent'
-                }}
+                onClick={() => handleNavClick(value)}
+                className={`sidebar-nav-btn ${isActive ? 'active' : ''}`}
               >
-                <Icon size={14} style={{ flexShrink: 0, opacity: isActive ? 1 : 0.7 }} />
+                <Icon size={14} className="sidebar-nav-icon" />
                 <span style={{ flex: 1 }}>{label}</span>
                 {count > 0 && (
-                  <span style={{
-                    fontSize: 11,
-                    color: isActive ? 'var(--accent-text)' : 'var(--text-tertiary)',
-                    fontFamily: 'var(--font-mono)',
-                    minWidth: 20,
-                    textAlign: 'right',
-                  }}>
-                    {count}
-                  </span>
+                  <span className="sidebar-nav-count">{count}</span>
                 )}
               </button>
             )
@@ -180,8 +143,8 @@ export function Sidebar() {
 
         {/* Tags */}
         {tags.length > 0 && (
-          <div style={{ padding: '0 8px', marginTop: 8 }}>
-            <p style={{ fontSize: 11, color: 'var(--text-tertiary)', padding: '4px 8px', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
+          <div className="sidebar-section">
+            <p className="sidebar-section-label">
               <Tag size={10} /> Tags
             </p>
             {tags.map((t) => {
@@ -190,36 +153,12 @@ export function Sidebar() {
                 <button
                   key={t}
                   type="button"
-                  onClick={() => setTag(isActive ? '' : t)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    width: '100%',
-                    padding: '5px 8px',
-                    borderRadius: 'var(--radius-md)',
-                    border: 'none',
-                    background: isActive ? 'var(--accent-muted)' : 'transparent',
-                    color: isActive ? 'var(--accent-text)' : 'var(--text-secondary)',
-                    cursor: 'pointer',
-                    fontSize: 12,
-                    fontFamily: 'var(--font-sans)',
-                    transition: 'background 0.1s',
-                    textAlign: 'left',
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isActive) (e.currentTarget as HTMLElement).style.background = 'var(--bg-hover)'
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isActive) (e.currentTarget as HTMLElement).style.background = 'transparent'
-                  }}
+                  onClick={() => { setTag(isActive ? '' : t); onClose?.() }}
+                  className={`sidebar-nav-btn ${isActive ? 'active' : ''}`}
+                  style={{ fontSize: 12 }}
                 >
-                  <span style={{
-                    width: 6, height: 6, borderRadius: '50%',
-                    background: isActive ? 'var(--accent)' : 'var(--border-strong)',
-                    flexShrink: 0,
-                  }} />
-                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <span className="sidebar-tag-dot" />
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
                     {t}
                   </span>
                 </button>
@@ -227,20 +166,22 @@ export function Sidebar() {
             })}
           </div>
         )}
-      </div>
+      </nav>
 
-      {/* Utility */}
-      <div style={{
-        borderTop: '1px solid var(--border-subtle)',
-        padding: '8px',
-        flexShrink: 0,
-      }}>
-        <SidebarAction icon={<Download size={13} />} label="Export CSV" onClick={handleExport} />
-        <SidebarAction
-          icon={<Upload size={13} />}
-          label="Import CSV"
+      {/* Footer utilities */}
+      <div className="sidebar-footer">
+        <button type="button" className="sidebar-action-btn" onClick={handleExport}>
+          <Download size={13} />
+          Export CSV
+        </button>
+        <button
+          type="button"
+          className="sidebar-action-btn"
           onClick={() => importRef.current?.click()}
-        />
+        >
+          <Upload size={13} />
+          Import CSV
+        </button>
         <input
           ref={importRef}
           type="file"
@@ -251,69 +192,11 @@ export function Sidebar() {
             e.target.value = ''
           }}
         />
-        <div style={{
-          marginTop: 8,
-          padding: '4px 8px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 6,
-          color: 'var(--text-tertiary)',
-          fontSize: 11,
-        }}>
-          <kbd style={{
-            background: 'var(--bg-elevated)',
-            border: '1px solid var(--border-default)',
-            borderRadius: 3,
-            padding: '1px 4px',
-            fontSize: 10,
-            fontFamily: 'var(--font-mono)',
-            color: 'var(--text-secondary)',
-          }}>⌘K</kbd>
+        <div className="sidebar-kbd-hint">
+          <kbd>⌘K</kbd>
           <span>Command palette</span>
         </div>
       </div>
     </aside>
-  )
-}
-
-function SidebarAction({
-  icon, label, onClick,
-}: {
-  icon: React.ReactNode
-  label: string
-  onClick: () => void
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 8,
-        width: '100%',
-        padding: '6px 8px',
-        borderRadius: 'var(--radius-md)',
-        border: 'none',
-        background: 'transparent',
-        color: 'var(--text-secondary)',
-        cursor: 'pointer',
-        fontSize: 12,
-        fontFamily: 'var(--font-sans)',
-        transition: 'background 0.1s, color 0.1s',
-        textAlign: 'left',
-      }}
-      onMouseEnter={(e) => {
-        ;(e.currentTarget as HTMLElement).style.background = 'var(--bg-hover)'
-        ;(e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'
-      }}
-      onMouseLeave={(e) => {
-        ;(e.currentTarget as HTMLElement).style.background = 'transparent'
-        ;(e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)'
-      }}
-    >
-      {icon}
-      {label}
-    </button>
   )
 }

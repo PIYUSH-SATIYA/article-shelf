@@ -1,4 +1,4 @@
-import { useEffect, useDeferredValue, useMemo } from 'react'
+import { useEffect, useDeferredValue, useMemo, useState } from 'react'
 import { useStore } from '@/store'
 import { useArticles } from '@/hooks/use-articles'
 import { Sidebar }         from '@/components/sidebar'
@@ -11,6 +11,7 @@ import { ArticleDialog }   from '@/components/article-dialog'
 import { CommandPalette }  from '@/components/command-palette'
 import { Toast }           from '@/components/toast'
 import type { ListParams } from '@/api/types'
+import { Library, Menu, X } from 'lucide-react'
 
 export default function App() {
   const search    = useStore((s) => s.search)
@@ -28,6 +29,8 @@ export default function App() {
   const dialogMode        = useStore((s) => s.dialogMode)
   const openCreateDialog  = useStore((s) => s.openCreateDialog)
   const closeDialog       = useStore((s) => s.closeDialog)
+
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   const deferredSearch = useDeferredValue(search)
 
@@ -65,37 +68,32 @@ export default function App() {
       const target = e.target as HTMLElement
       const isEditing = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable
 
-      // ⌘K / Ctrl+K — command palette (works from anywhere)
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault()
         paletteOpen ? closePalette() : openPalette()
         return
       }
 
-      // Esc — close overlays (dialog > palette)
       if (e.key === 'Escape') {
+        if (sidebarOpen) { setSidebarOpen(false); return }
         if (paletteOpen) { closePalette(); return }
         if (dialogMode)  { closeDialog();  return }
       }
 
-      // Don't intercept other keys when user is typing in an input
       if (isEditing) return
 
-      // / — focus search
       if (e.key === '/') {
         e.preventDefault()
         document.getElementById('filter-search')?.focus()
         return
       }
 
-      // N — open create dialog (full form)
       if (e.key === 'n' || e.key === 'N') {
         e.preventDefault()
         openCreateDialog()
         return
       }
 
-      // C — focus quick-add URL input (fast capture)
       if (e.key === 'c' || e.key === 'C') {
         e.preventDefault()
         const el = document.getElementById('quick-add-url') as HTMLInputElement | null
@@ -105,32 +103,53 @@ export default function App() {
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [paletteOpen, dialogMode, openPalette, closePalette, openCreateDialog, closeDialog])
+  }, [paletteOpen, dialogMode, sidebarOpen, openPalette, closePalette, openCreateDialog, closeDialog])
 
   return (
-    <div style={{
-      display: 'flex',
-      minHeight: '100vh',
-      background: 'var(--bg-base)',
-    }}>
-      <Sidebar />
+    <div className="app-layout">
+      {/* Mobile sidebar overlay */}
+      <div
+        className={`sidebar-overlay ${sidebarOpen ? 'open' : ''}`}
+        onClick={() => setSidebarOpen(false)}
+      />
 
-      <main style={{
-        flex: 1,
-        minWidth: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        padding: '16px 24px',
-        gap: 10,
-        overflowY: 'auto',
-        maxHeight: '100vh',
-      }}>
-        <QuickAdd />
-        <FilterBar />
-        <BulkToolbar />
-        <ArticleList />
-        <Pagination total={articles.length} />
-      </main>
+      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        {/* Mobile top bar */}
+        <header className="mobile-topbar">
+          <button
+            className="mobile-menu-btn"
+            onClick={() => setSidebarOpen(true)}
+            aria-label="Open menu"
+          >
+            <Menu size={20} />
+          </button>
+          <div className="mobile-logo">
+            <div className="sidebar-logo-icon" style={{ width: 24, height: 24 }}>
+              <Library size={12} color="#fff" />
+            </div>
+            Shelf
+          </div>
+          <div style={{ flex: 1 }} />
+          <button
+            className="mobile-menu-btn"
+            onClick={openCreateDialog}
+            aria-label="New article"
+            title="New article (N)"
+          >
+            <X size={20} style={{ display: 'none' }} />
+          </button>
+        </header>
+
+        <main className="main-content">
+          <QuickAdd />
+          <FilterBar />
+          <BulkToolbar />
+          <ArticleList />
+          <Pagination total={articles.length} />
+        </main>
+      </div>
 
       {/* Overlays */}
       <ArticleDialog />

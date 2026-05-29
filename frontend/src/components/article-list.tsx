@@ -1,8 +1,8 @@
-import { Loader2 } from 'lucide-react'
+import { BookOpen, Loader2 } from 'lucide-react'
 import { useArticles } from '@/hooks/use-articles'
 import { useStore } from '@/store'
 import type { ListParams } from '@/api/types'
-import { ArticleRow, ROW_COLUMNS } from './article-row'
+import { ArticleRow } from './article-row'
 
 export function ArticleList() {
   const search    = useStore((s) => s.search)
@@ -45,28 +45,10 @@ export function ArticleList() {
   }
 
   return (
-    <div
-      role="table"
-      style={{
-        background: 'var(--bg-surface)',
-        border: '1px solid var(--border-subtle)',
-        borderRadius: 'var(--radius-lg)',
-        overflow: 'hidden',
-      }}
-    >
-      {/* Header — uses same ROW_COLUMNS as rows */}
-      <div
-        role="row"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: ROW_COLUMNS,
-          alignItems: 'center',
-          background: 'var(--bg-elevated)',
-          borderBottom: '1px solid var(--border-subtle)',
-          padding: '0 8px',
-          minHeight: 32,
-        }}
-      >
+    <div role="table" className="article-list-wrap">
+      {/* Header */}
+      <div role="row" className="article-list-header">
+        {/* Checkbox */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <input
             type="checkbox"
@@ -77,11 +59,11 @@ export function ArticleList() {
             style={{ width: 14, height: 14, accentColor: 'var(--accent)', cursor: 'pointer' }}
           />
         </div>
-        <ColHeader>Title / URL</ColHeader>
-        <ColHeader>Tags</ColHeader>
-        <ColHeader align="center">Status</ColHeader>
-        <ColHeader align="center">Pri</ColHeader>
-        <ColHeader align="right">Added</ColHeader>
+        <span className="article-list-header-cell">Title / URL</span>
+        <span className="article-list-header-cell col-tags">Tags</span>
+        <span className="article-list-header-cell" style={{ textAlign: 'center' }}>Status</span>
+        <span className="article-list-header-cell col-priority" style={{ textAlign: 'center' }}>Pri</span>
+        <span className="article-list-header-cell col-date" style={{ textAlign: 'right' }}>Added</span>
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
           {isFetching && !isLoading && (
             <Loader2 size={11} style={{ color: 'var(--text-tertiary)', animation: 'spin 1s linear infinite' }} />
@@ -91,20 +73,17 @@ export function ArticleList() {
 
       {/* Body */}
       {isLoading ? (
-        <div style={{
-          padding: '48px 16px', textAlign: 'center',
-          color: 'var(--text-tertiary)', display: 'flex',
-          alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 13,
-        }}>
-          <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />
-          Loading…
+        <div className="article-list-empty">
+          <Loader2 size={20} style={{ animation: 'spin 1s linear infinite', color: 'var(--accent)' }} />
+          <p>Loading…</p>
         </div>
       ) : articles.length === 0 ? (
-        <div style={{
-          padding: '48px 16px', textAlign: 'center',
-          color: 'var(--text-tertiary)', fontSize: 13,
-        }}>
-          No articles match your filters.
+        <div className="article-list-empty">
+          <div className="article-list-empty-icon">
+            <BookOpen size={22} />
+          </div>
+          <p>No articles here yet</p>
+          <span>Paste a URL above or press N to add one</span>
         </div>
       ) : (
         articles.map((article) => (
@@ -123,17 +102,5 @@ export function ArticleList() {
         }
       `}</style>
     </div>
-  )
-}
-
-function ColHeader({ children, align }: { children?: React.ReactNode; align?: 'left' | 'center' | 'right' }) {
-  return (
-    <span style={{
-      fontSize: 10, fontWeight: 600, textTransform: 'uppercase',
-      letterSpacing: '0.06em', color: 'var(--text-tertiary)',
-      textAlign: align ?? 'left',
-    }}>
-      {children}
-    </span>
   )
 }

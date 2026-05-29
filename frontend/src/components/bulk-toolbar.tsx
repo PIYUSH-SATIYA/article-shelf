@@ -44,115 +44,41 @@ export function BulkToolbar() {
   }
 
   return (
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      gap: 8,
-      padding: '8px 12px',
-      background: 'var(--accent-muted)',
-      border: '1px solid var(--accent)',
-      borderRadius: 'var(--radius-lg)',
-      flexWrap: 'wrap',
-    }}>
-      {/* Selection info */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--accent-text)', fontSize: 12, fontWeight: 500 }}>
+    <div className="bulk-toolbar">
+      <div className="bulk-info">
         <CheckSquare size={13} />
         {ids.length} selected
       </div>
 
-      <div style={{ width: 1, height: 16, background: 'var(--border-strong)' }} />
+      <div className="bulk-divider" />
 
-      {/* Archive */}
-      <BulkBtn onClick={handleArchive} icon={<Archive size={12} />}>
-        Archive
-      </BulkBtn>
+      <button type="button" className="bulk-btn" onClick={handleArchive}>
+        <Archive size={12} /> Archive
+      </button>
 
-      {/* Status update */}
       <div style={{ display: 'flex', gap: 4 }}>
         <select
           value={bulkStatus}
           onChange={(e) => setBulkStatus(e.target.value)}
-          style={{
-            background: 'var(--bg-elevated)',
-            border: '1px solid var(--border-default)',
-            borderRadius: 'var(--radius-md)',
-            padding: '5px 8px',
-            color: 'var(--text-secondary)',
-            fontSize: 11,
-            fontFamily: 'var(--font-sans)',
-            cursor: 'pointer',
-            outline: 'none',
-          }}
+          className="compact-select"
         >
           {STATUS_OPTIONS.map((s) => (
             <option key={s} value={s}>{s}</option>
           ))}
         </select>
-        <BulkBtn onClick={handleStatus} icon={<Square size={12} />}>
-          Set status
-        </BulkBtn>
+        <button type="button" className="bulk-btn" onClick={handleStatus}>
+          <Square size={12} /> Set status
+        </button>
       </div>
 
-      {/* Delete */}
-      <BulkBtn onClick={handleDelete} icon={<Trash2 size={12} />} danger>
-        Delete
-      </BulkBtn>
+      <button type="button" className="bulk-btn danger" onClick={handleDelete}>
+        <Trash2 size={12} /> Delete
+      </button>
 
-      {/* Spacer + clear */}
-      <div style={{ flex: 1 }} />
-      <button
-        type="button"
-        onClick={clearSelection}
-        style={{
-          display: 'flex', alignItems: 'center', gap: 4,
-          background: 'none', border: 'none',
-          color: 'var(--text-tertiary)',
-          cursor: 'pointer', fontSize: 11,
-          fontFamily: 'var(--font-sans)',
-        }}
-      >
+      <div className="bulk-spacer" />
+      <button type="button" className="bulk-clear-btn" onClick={clearSelection}>
         <X size={11} /> Clear
       </button>
     </div>
-  )
-}
-
-function BulkBtn({
-  children, onClick, icon, danger = false,
-}: {
-  children: React.ReactNode
-  onClick: () => void
-  icon: React.ReactNode
-  danger?: boolean
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 5,
-        padding: '5px 10px',
-        background: 'var(--bg-elevated)',
-        border: `1px solid ${danger ? 'var(--danger)' : 'var(--border-default)'}`,
-        borderRadius: 'var(--radius-md)',
-        color: danger ? 'var(--danger)' : 'var(--text-secondary)',
-        cursor: 'pointer',
-        fontSize: 12,
-        fontFamily: 'var(--font-sans)',
-        transition: 'background 0.1s, color 0.1s',
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.background = danger ? 'var(--danger-bg)' : 'var(--bg-hover)'
-        if (!danger) e.currentTarget.style.color = 'var(--text-primary)'
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.background = 'var(--bg-elevated)'
-        e.currentTarget.style.color = danger ? 'var(--danger)' : 'var(--text-secondary)'
-      }}
-    >
-      {icon} {children}
-    </button>
   )
 }

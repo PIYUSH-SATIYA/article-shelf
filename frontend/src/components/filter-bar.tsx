@@ -24,37 +24,22 @@ export function FilterBar() {
   const order     = useStore((s) => s.order)
   const limit     = useStore((s) => s.limit)
 
-  const setSearch   = useStore((s) => s.setSearch)
-  const setStatus   = useStore((s) => s.setStatus)
-  const setPriority = useStore((s) => s.setPriority)
-  const setTag      = useStore((s) => s.setTag)
-  const setSortBy   = useStore((s) => s.setSortBy)
-  const setOrder    = useStore((s) => s.setOrder)
-  const setLimit    = useStore((s) => s.setLimit)
+  const setSearch    = useStore((s) => s.setSearch)
+  const setStatus    = useStore((s) => s.setStatus)
+  const setPriority  = useStore((s) => s.setPriority)
+  const setTag       = useStore((s) => s.setTag)
+  const setSortBy    = useStore((s) => s.setSortBy)
+  const setOrder     = useStore((s) => s.setOrder)
+  const setLimit     = useStore((s) => s.setLimit)
   const resetFilters = useStore((s) => s.resetFilters)
 
   const hasFilters = search || status || priority || tag
 
   return (
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      gap: 8,
-      flexWrap: 'wrap',
-    }}>
+    <div className="filter-bar">
       {/* Search */}
-      <div style={{ position: 'relative', flex: '1 1 200px', minWidth: 160, maxWidth: 340 }}>
-        <Search
-          size={13}
-          style={{
-            position: 'absolute',
-            left: 10,
-            top: '50%',
-            transform: 'translateY(-50%)',
-            color: 'var(--text-tertiary)',
-            pointerEvents: 'none',
-          }}
-        />
+      <div className="filter-search-wrap" style={{ flex: '1 1 180px', maxWidth: 320 }}>
+        <Search size={13} className="search-icon" />
         <input
           ref={searchRef}
           id="filter-search"
@@ -62,30 +47,12 @@ export function FilterBar() {
           placeholder="Search…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          style={{
-            width: '100%',
-            background: 'var(--bg-surface)',
-            border: '1px solid var(--border-subtle)',
-            borderRadius: 'var(--radius-md)',
-            padding: '6px 10px 6px 30px',
-            color: 'var(--text-primary)',
-            fontSize: 13,
-            fontFamily: 'var(--font-sans)',
-            outline: 'none',
-            transition: 'border-color 0.15s',
-          }}
-          onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--border-focus)' }}
-          onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--border-subtle)' }}
         />
         {search && (
           <button
             type="button"
             onClick={() => setSearch('')}
-            style={{
-              position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)',
-              background: 'none', border: 'none', cursor: 'pointer',
-              color: 'var(--text-tertiary)', display: 'flex', padding: 2,
-            }}
+            className="filter-clear-btn"
           >
             <X size={12} />
           </button>
@@ -118,13 +85,13 @@ export function FilterBar() {
         ))}
       </CompactSelect>
 
-      {/* Tag filter */}
+      {/* Active tag pill */}
       {tag && (
         <div style={{
           display: 'flex', alignItems: 'center', gap: 4,
           padding: '4px 8px 4px 10px',
           background: 'var(--accent-muted)',
-          border: '1px solid var(--accent)',
+          border: '1px solid var(--accent-muted-border)',
           borderRadius: 'var(--radius-md)',
           fontSize: 12, color: 'var(--accent-text)',
         }}>
@@ -132,15 +99,14 @@ export function FilterBar() {
           <button
             type="button"
             onClick={() => setTag('')}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', display: 'flex', padding: 0 }}
+            className="filter-clear-btn"
           >
             <X size={11} />
           </button>
         </div>
       )}
 
-      {/* Spacer */}
-      <div style={{ flex: 1 }} />
+      <div className="filter-spacer" />
 
       {/* Sort */}
       <CompactSelect
@@ -159,26 +125,7 @@ export function FilterBar() {
         type="button"
         onClick={() => setOrder(order === 'desc' ? 'asc' : 'desc')}
         title={order === 'desc' ? 'Newest first — click for oldest' : 'Oldest first — click for newest'}
-        style={{
-          display: 'flex', alignItems: 'center', gap: 4,
-          background: 'var(--bg-surface)',
-          border: '1px solid var(--border-subtle)',
-          borderRadius: 'var(--radius-md)',
-          padding: '6px 10px',
-          color: 'var(--text-secondary)',
-          fontSize: 12,
-          fontFamily: 'var(--font-sans)',
-          cursor: 'pointer',
-          transition: 'border-color 0.15s, color 0.15s',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.borderColor = 'var(--border-strong)'
-          e.currentTarget.style.color = 'var(--text-primary)'
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.borderColor = 'var(--border-subtle)'
-          e.currentTarget.style.color = 'var(--text-secondary)'
-        }}
+        className="order-btn"
       >
         {order === 'desc' ? <ArrowDown size={13} /> : <ArrowUp size={13} />}
         {order === 'desc' ? 'Newest' : 'Oldest'}
@@ -196,23 +143,9 @@ export function FilterBar() {
         ))}
       </CompactSelect>
 
-      {/* Reset filters */}
+      {/* Reset */}
       {hasFilters && (
-        <button
-          type="button"
-          onClick={resetFilters}
-          style={{
-            display: 'flex', alignItems: 'center', gap: 4,
-            background: 'none',
-            border: '1px solid var(--border-subtle)',
-            borderRadius: 'var(--radius-md)',
-            padding: '6px 10px',
-            color: 'var(--text-tertiary)',
-            fontSize: 12,
-            fontFamily: 'var(--font-sans)',
-            cursor: 'pointer',
-          }}
-        >
+        <button type="button" onClick={resetFilters} className="filter-reset-btn">
           <X size={11} /> Clear
         </button>
       )}
@@ -229,28 +162,12 @@ function CompactSelect({
   placeholder: string
   children: React.ReactNode
 }) {
-  const hasValue = Boolean(value)
   return (
     <select
       id={id}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      style={{
-        background: hasValue ? 'var(--accent-muted)' : 'var(--bg-surface)',
-        border: `1px solid ${hasValue ? 'var(--accent)' : 'var(--border-subtle)'}`,
-        borderRadius: 'var(--radius-md)',
-        padding: '6px 10px',
-        color: hasValue ? 'var(--accent-text)' : 'var(--text-secondary)',
-        fontSize: 12,
-        fontFamily: 'var(--font-sans)',
-        cursor: 'pointer',
-        outline: 'none',
-        appearance: 'none',
-        paddingRight: 24,
-        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238b8fa8'/%3E%3C/svg%3E")`,
-        backgroundRepeat: 'no-repeat',
-        backgroundPosition: 'right 8px center',
-      }}
+      className={`compact-select ${value ? 'active' : ''}`}
       title={placeholder}
     >
       {children}

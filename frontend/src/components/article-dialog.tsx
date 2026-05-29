@@ -25,10 +25,10 @@ type FormState = {
 }
 
 export function ArticleDialog() {
-  const dialogMode = useStore((s) => s.dialogMode)
-  const editingId  = useStore((s) => s.editingArticleId)
+  const dialogMode  = useStore((s) => s.dialogMode)
+  const editingId   = useStore((s) => s.editingArticleId)
   const closeDialog = useStore((s) => s.closeDialog)
-  const addToast   = useStore((s) => s.addToast)
+  const addToast    = useStore((s) => s.addToast)
 
   const isCreate = dialogMode === 'create'
   const isEdit   = dialogMode === 'edit'
@@ -39,11 +39,10 @@ export function ArticleDialog() {
 
   const [form, setForm] = useState<FormState>(EMPTY)
   const [dirty, setDirty] = useState(false)
-  const urlInputRef = useRef<HTMLInputElement>(null)
+  const urlInputRef   = useRef<HTMLInputElement>(null)
   const titleInputRef = useRef<HTMLInputElement>(null)
-  const tagInputRef = useRef<HTMLInputElement>(null)
+  const tagInputRef   = useRef<HTMLInputElement>(null)
 
-  // Populate form when article loads (edit mode)
   useEffect(() => {
     if (isEdit && article) {
       setForm({
@@ -61,7 +60,6 @@ export function ArticleDialog() {
     }
   }, [isEdit, article])
 
-  // Reset form on create mode open
   useEffect(() => {
     if (isCreate) {
       setForm(EMPTY)
@@ -70,26 +68,17 @@ export function ArticleDialog() {
     }
   }, [isCreate])
 
-  // Auto-focus title when editing
   useEffect(() => {
     if (isEdit && article) {
       setTimeout(() => titleInputRef.current?.focus(), 80)
     }
   }, [isEdit, article])
 
-  // Keyboard: Esc to close
   useEffect(() => {
     if (!dialogMode) return
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.preventDefault()
-        closeDialog()
-      }
-      // Ctrl/⌘+Enter to submit
-      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-        e.preventDefault()
-        handleSubmit()
-      }
+      if (e.key === 'Escape') { e.preventDefault(); closeDialog() }
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); handleSubmit() }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
@@ -165,47 +154,21 @@ export function ArticleDialog() {
     }
   }
 
-  const isPending = isCreating || isSaving
-  const canSubmit = isCreate ? form.url.trim().length > 0 : dirty
+  const isPending  = isCreating || isSaving
+  const canSubmit  = isCreate ? form.url.trim().length > 0 : dirty
 
   return (
-    <>
-      {/* Backdrop */}
+    <div className="dialog-backdrop" onClick={closeDialog}>
       <div
-        onClick={closeDialog}
-        style={{
-          position: 'fixed', inset: 0,
-          background: 'rgba(0,0,0,0.55)',
-          zIndex: 80,
-        }}
-      />
-
-      {/* Dialog */}
-      <div style={{
-        position: 'fixed',
-        top: '50%', left: '50%',
-        transform: 'translate(-50%, -50%)',
-        width: 'min(620px, 94vw)',
-        maxHeight: '90vh',
-        background: 'var(--bg-surface)',
-        border: '1px solid var(--border-default)',
-        borderRadius: 'var(--radius-lg)',
-        boxShadow: 'var(--shadow-xl)',
-        zIndex: 90,
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-      }}>
+        className="dialog-panel"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label={isCreate ? 'Add Article' : 'Edit Article'}
+      >
         {/* Header */}
-        <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '14px 20px',
-          borderBottom: '1px solid var(--border-subtle)',
-          flexShrink: 0,
-        }}>
-          <h2 style={{ fontSize: 16, fontWeight: 600, margin: 0, color: 'var(--text-primary)' }}>
-            {isCreate ? 'Add Article' : 'Edit Article'}
-          </h2>
+        <div className="dialog-header">
+          <h2 className="dialog-title">{isCreate ? 'Add Article' : 'Edit Article'}</h2>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             {isEdit && editingId && (
               <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}>
@@ -215,12 +178,7 @@ export function ArticleDialog() {
             <button
               type="button"
               onClick={closeDialog}
-              style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                width: 28, height: 28, borderRadius: 'var(--radius-sm)',
-                background: 'transparent', border: 'none',
-                color: 'var(--text-tertiary)', cursor: 'pointer',
-              }}
+              className="dialog-close-btn"
               title="Close (Esc)"
             >
               <X size={16} />
@@ -228,89 +186,97 @@ export function ArticleDialog() {
           </div>
         </div>
 
-        {/* Body — scrollable */}
-        <div style={{
-          overflowY: 'auto', flex: 1,
-          padding: '16px 20px',
-          display: 'flex', flexDirection: 'column', gap: 14,
-        }}>
+        {/* Body */}
+        <div className="dialog-body">
           {/* URL */}
-          <Field label="URL" required={isCreate}>
+          <div className="field-group">
+            <label className="field-label">
+              URL {isCreate && <span style={{ color: 'var(--danger)', fontSize: 10 }}>*</span>}
+            </label>
             <input
               ref={urlInputRef}
               type="url"
               value={form.url}
               onChange={(e) => setField('url', e.target.value)}
               placeholder="https://…"
-              style={inputStyle}
-              onFocus={focusStyle}
-              onBlur={blurStyle}
+              className="field-input"
             />
-          </Field>
+          </div>
 
           {/* Title */}
-          <Field label="Title" hint={isCreate ? '(auto-fills from URL if blank)' : undefined}>
+          <div className="field-group">
+            <label className="field-label">
+              Title
+              {isCreate && (
+                <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 'normal', fontSize: 10, color: 'var(--text-tertiary)' }}>
+                  {' '}(auto-fills from URL if blank)
+                </span>
+              )}
+            </label>
             <input
               ref={titleInputRef}
               type="text"
               value={form.title}
               onChange={(e) => setField('title', e.target.value)}
               placeholder={isCreate && form.url ? guessTitle(form.url) : 'Article title'}
-              style={inputStyle}
-              onFocus={focusStyle}
-              onBlur={blurStyle}
+              className="field-input"
             />
-          </Field>
+          </div>
 
-          {/* Status + Priority — side by side */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <Field label="Status">
+          {/* Status + Priority */}
+          <div className="field-row">
+            <div className="field-group">
+              <label className="field-label">Status</label>
               <select
                 value={form.status}
                 onChange={(e) => setField('status', e.target.value)}
-                style={{ ...inputStyle, cursor: 'pointer' }}
-                onFocus={focusStyle}
-                onBlur={blurStyle}
+                className="field-select"
               >
                 {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
               </select>
-            </Field>
-            <Field label="Priority">
+            </div>
+            <div className="field-group">
+              <label className="field-label">Priority</label>
               <select
                 value={form.priority}
                 onChange={(e) => setField('priority', Number(e.target.value))}
-                style={{ ...inputStyle, cursor: 'pointer' }}
-                onFocus={focusStyle}
-                onBlur={blurStyle}
+                className="field-select"
               >
-                {PRIORITY_OPTIONS.map((p) => <option key={p} value={p}>P{p}{p === 1 ? ' — Urgent' : p === 5 ? ' — Low' : ''}</option>)}
+                {PRIORITY_OPTIONS.map((p) => (
+                  <option key={p} value={p}>P{p}{p === 1 ? ' — Urgent' : p === 5 ? ' — Low' : ''}</option>
+                ))}
               </select>
-            </Field>
+            </div>
           </div>
 
           {/* Tags */}
-          <Field label={<span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><Tag size={10} /> Tags</span>}>
+          <div className="field-group">
+            <label className="field-label" style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+              <Tag size={10} /> Tags
+            </label>
             <div style={{
-              background: 'var(--bg-elevated)',
+              background: 'var(--bg-surface)',
               border: '1px solid var(--border-default)',
               borderRadius: 'var(--radius-md)',
-              padding: '6px 8px',
+              padding: '6px 10px',
               display: 'flex', flexWrap: 'wrap', gap: 5,
-              minHeight: 36,
+              minHeight: 40,
+              transition: 'border-color var(--transition-base)',
             }}>
               {form.tags.map((t) => (
                 <span key={t} style={{
                   display: 'flex', alignItems: 'center', gap: 4,
-                  padding: '2px 6px',
+                  padding: '2px 7px',
                   background: 'var(--accent-muted)',
-                  border: '1px solid var(--accent)',
-                  borderRadius: 3,
+                  border: '1px solid var(--accent-muted-border)',
+                  borderRadius: 'var(--radius-xs)',
                   fontSize: 11, color: 'var(--accent-text)',
                   fontFamily: 'var(--font-mono)',
                 }}>
                   {t}
                   <button
-                    type="button" onClick={() => removeTag(t)}
+                    type="button"
+                    onClick={() => removeTag(t)}
                     style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', display: 'flex', padding: 0 }}
                   ><X size={10} /></button>
                 </span>
@@ -330,170 +296,93 @@ export function ArticleDialog() {
                 }}
                 style={{
                   flex: 1, minWidth: 80, border: 'none', background: 'transparent',
-                  color: 'var(--text-primary)', fontSize: 12, fontFamily: 'var(--font-mono)', outline: 'none',
+                  color: 'var(--text-primary)', fontSize: 12,
+                  fontFamily: 'var(--font-mono)', outline: 'none',
                 }}
               />
             </div>
-          </Field>
+          </div>
 
           {/* Reason */}
-          <Field label="Why save this?">
+          <div className="field-group">
+            <label className="field-label">Why save this?</label>
             <textarea
               rows={2}
               value={form.reason}
               onChange={(e) => setField('reason', e.target.value)}
               placeholder="What made you want to save this?"
-              style={inputStyle}
-              onFocus={focusStyle}
-              onBlur={blurStyle}
+              className="field-input"
             />
-          </Field>
+          </div>
 
           {/* Notes */}
-          <Field label="Notes">
+          <div className="field-group">
+            <label className="field-label">Notes</label>
             <textarea
               rows={4}
               value={form.notes}
               onChange={(e) => setField('notes', e.target.value)}
               placeholder="Key takeaways, actions, quotes…"
-              style={inputStyle}
-              onFocus={focusStyle}
-              onBlur={blurStyle}
+              className="field-input"
             />
-          </Field>
+          </div>
 
           {/* Source */}
-          <Field label="Source">
+          <div className="field-group">
+            <label className="field-label">Source</label>
             <input
               type="text"
               value={form.source}
               onChange={(e) => setField('source', e.target.value)}
               placeholder="newsletter, blog, tweet, HN…"
-              style={inputStyle}
-              onFocus={focusStyle}
-              onBlur={blurStyle}
+              className="field-input"
             />
-          </Field>
+          </div>
 
           {/* Metadata (edit only) */}
           {isEdit && article && (
             <div style={{
               display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8,
-              padding: '10px', background: 'var(--bg-elevated)',
+              padding: '10px 12px', background: 'var(--bg-elevated)',
               borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)',
             }}>
-              <Meta label="Created" value={new Date(article.created_at).toLocaleString()} />
-              <Meta label="Updated" value={new Date(article.updated_at).toLocaleString()} />
+              <div>
+                <p className="field-label" style={{ marginBottom: 3 }}>Created</p>
+                <p style={{ fontSize: 11, color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>
+                  {new Date(article.created_at).toLocaleString()}
+                </p>
+              </div>
+              <div>
+                <p className="field-label" style={{ marginBottom: 3 }}>Updated</p>
+                <p style={{ fontSize: 11, color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>
+                  {new Date(article.updated_at).toLocaleString()}
+                </p>
+              </div>
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div style={{
-          padding: '12px 20px',
-          borderTop: '1px solid var(--border-subtle)',
-          display: 'flex', gap: 8, alignItems: 'center',
-          flexShrink: 0,
-        }}>
+        <div className="dialog-footer">
           <button
             type="button"
             onClick={handleSubmit}
             disabled={!canSubmit || isPending}
-            style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-              padding: '8px 20px',
-              background: canSubmit ? 'var(--accent)' : 'var(--bg-elevated)',
-              border: `1px solid ${canSubmit ? 'var(--accent)' : 'var(--border-default)'}`,
-              borderRadius: 'var(--radius-md)',
-              color: canSubmit ? '#fff' : 'var(--text-tertiary)',
-              fontSize: 13, fontWeight: 500, fontFamily: 'var(--font-sans)',
-              cursor: canSubmit && !isPending ? 'pointer' : 'not-allowed',
-              transition: 'background 0.15s',
-            }}
+            className={`btn btn-primary`}
+            style={{ opacity: (!canSubmit || isPending) ? 0.55 : 1, cursor: (!canSubmit || isPending) ? 'not-allowed' : 'pointer' }}
           >
             <Save size={13} />
             {isPending ? 'Saving…' : isCreate ? 'Save Article' : 'Save Changes'}
           </button>
-          <button
-            type="button"
-            onClick={closeDialog}
-            style={{
-              padding: '8px 14px',
-              background: 'transparent',
-              border: '1px solid var(--border-subtle)',
-              borderRadius: 'var(--radius-md)',
-              color: 'var(--text-secondary)', fontSize: 13, fontFamily: 'var(--font-sans)',
-              cursor: 'pointer',
-            }}
-          >
+          <button type="button" onClick={closeDialog} className="btn btn-ghost">
             Cancel
           </button>
           <div style={{ flex: 1 }} />
           <span style={{ fontSize: 11, color: 'var(--text-tertiary)', display: 'flex', alignItems: 'center', gap: 4 }}>
-            <kbd style={{
-              background: 'var(--bg-elevated)', border: '1px solid var(--border-default)',
-              borderRadius: 3, padding: '1px 5px', fontSize: 10,
-              fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)',
-            }}>⌘↵</kbd>
-            save
+            <kbd>⌘↵</kbd> save
           </span>
         </div>
       </div>
-    </>
-  )
-}
-
-/* ─── Helpers ────────────────────────────────────────────────── */
-
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  background: 'var(--bg-elevated)',
-  border: '1px solid var(--border-default)',
-  borderRadius: 'var(--radius-md)',
-  padding: '8px 12px',
-  color: 'var(--text-primary)',
-  fontSize: 13,
-  fontFamily: 'var(--font-sans)',
-  outline: 'none',
-  resize: 'vertical',
-  transition: 'border-color 0.15s',
-}
-
-function focusStyle(e: React.FocusEvent<HTMLElement>) {
-  e.currentTarget.style.borderColor = 'var(--border-focus)'
-}
-function blurStyle(e: React.FocusEvent<HTMLElement>) {
-  e.currentTarget.style.borderColor = 'var(--border-default)'
-}
-
-function Field({ label, hint, required, children }: {
-  label: React.ReactNode; hint?: string; required?: boolean; children: React.ReactNode
-}) {
-  return (
-    <div>
-      <div style={{
-        fontSize: 11, fontWeight: 600, textTransform: 'uppercase',
-        letterSpacing: '0.06em', color: 'var(--text-tertiary)',
-        marginBottom: 5, display: 'flex', alignItems: 'center', gap: 6,
-      }}>
-        {label}
-        {required && <span style={{ color: 'var(--danger)', fontSize: 10 }}>*</span>}
-        {hint && <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 'normal', fontSize: 10 }}>{hint}</span>}
-      </div>
-      {children}
-    </div>
-  )
-}
-
-function Meta({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <p style={{ fontSize: 10, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600, marginBottom: 2 }}>
-        {label}
-      </p>
-      <p style={{ fontSize: 11, color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)', margin: 0 }}>
-        {value}
-      </p>
     </div>
   )
 }

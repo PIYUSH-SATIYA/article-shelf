@@ -8,62 +8,26 @@ export function Toast() {
   if (toasts.length === 0) return null
 
   return (
-    <div
-      aria-live="polite"
-      style={{
-        position: 'fixed',
-        bottom: 20,
-        right: 20,
-        zIndex: 200,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 8,
-        maxWidth: 320,
-        pointerEvents: 'none',
-      }}
-    >
+    <div className="toast-container" aria-live="polite">
       {toasts.map((t) => (
-        <div
-          key={t.id}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            padding: '10px 12px',
-            background: 'var(--bg-elevated)',
-            border: `1px solid ${t.type === 'error' ? 'var(--danger)' : 'var(--border-default)'}`,
-            borderRadius: 'var(--radius-lg)',
-            boxShadow: 'var(--shadow-md)',
-            color: t.type === 'error' ? 'var(--danger)' : 'var(--text-primary)',
-            fontSize: 13,
-            pointerEvents: 'all',
-            animation: 'slideIn 0.2s ease',
-          }}
-        >
-          {t.type === 'error'
-            ? <AlertCircle size={14} style={{ flexShrink: 0, color: 'var(--danger)' }} />
-            : <CheckCircle size={14} style={{ flexShrink: 0, color: 'var(--success)' }} />
-          }
-          <span style={{ flex: 1 }}>{t.message}</span>
+        <div key={t.id} className={`toast ${t.type === 'error' ? 'error' : ''}`}>
+          <span className="toast-icon">
+            {t.type === 'error'
+              ? <AlertCircle size={14} style={{ color: 'var(--danger)' }} />
+              : <CheckCircle size={14} style={{ color: 'var(--success)' }} />
+            }
+          </span>
+          <span className="toast-msg">{t.message}</span>
           <button
             type="button"
             onClick={() => removeToast(t.id)}
-            style={{
-              background: 'none', border: 'none', cursor: 'pointer',
-              color: 'var(--text-tertiary)', display: 'flex', padding: 2,
-              flexShrink: 0,
-            }}
+            className="toast-close-btn"
+            aria-label="Dismiss"
           >
             <X size={12} />
           </button>
         </div>
       ))}
-      <style>{`
-        @keyframes slideIn {
-          from { transform: translateX(20px); opacity: 0; }
-          to   { transform: translateX(0);    opacity: 1; }
-        }
-      `}</style>
     </div>
   )
 }
