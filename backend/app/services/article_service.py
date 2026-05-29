@@ -107,9 +107,19 @@ def list_articles(
         stmt = _apply_sort(stmt, sort_by=sort_by, order=order)
 
     if tag:
-        articles = db.execute(stmt).scalars().all()
-        articles = [article for article in articles if article.tags and tag in article.tags]
-        return _apply_offset_limit(articles, offset=offset, limit=limit)
+        tag_filter = tag.strip().lower()
+        if tag_filter:
+            articles = db.execute(stmt).scalars().all()
+            articles = [
+                article
+                for article in articles
+                if article.tags
+                and any(
+                    tag_filter in (tag_value or "").lower()
+                    for tag_value in article.tags
+                )
+            ]
+            return _apply_offset_limit(articles, offset=offset, limit=limit)
 
     if offset is not None:
         stmt = stmt.offset(offset)
