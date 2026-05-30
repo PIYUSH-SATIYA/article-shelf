@@ -33,9 +33,12 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   // Capture share params EAGERLY (before any effects can modify the URL)
-  const initialShareParams = useRef(() => {
+  const shareUrl = useRef<string | null>((() => {
+    const path = window.location.pathname
     const sp = new URLSearchParams(window.location.search)
-    if (sp.get('action') !== 'share') return null
+    // Detect share: path-based (/share) from manifest, or legacy ?action=share
+    const isShare = path === '/share' || sp.get('action') === 'share'
+    if (!isShare) return null
     const sharedUrl = sp.get('url') || ''
     const sharedText = sp.get('text') || ''
     let finalUrl = sharedUrl.trim()
@@ -44,8 +47,7 @@ export default function App() {
       finalUrl = urlMatch ? urlMatch[0] : sharedText.trim()
     }
     return finalUrl || null
-  })
-  const shareUrl = useRef<string | null>(typeof initialShareParams.current === 'function' ? initialShareParams.current() : null)
+  })())
 
   const deferredSearch = useDeferredValue(search)
 
@@ -82,6 +84,8 @@ export default function App() {
     const url = shareUrl.current
     if (url) {
       shareUrl.current = null // consume it
+      // Clean up the URL (remove /share path and share params)
+      window.history.replaceState(null, '', '/')
       useStore.getState().openCreateDialog(url)
     }
   }, [])
