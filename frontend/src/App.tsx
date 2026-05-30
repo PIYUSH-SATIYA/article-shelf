@@ -68,7 +68,6 @@ export default function App() {
     if (searchParams.get('action') === 'share') {
       const sharedUrl = searchParams.get('url') || ''
       const sharedText = searchParams.get('text') || ''
-      const sharedTitle = searchParams.get('title') || ''
 
       // Try to extract a URL: prefer explicit url param, then look for URL in text
       let finalUrl = sharedUrl.trim()
