@@ -66,11 +66,28 @@ export default function App() {
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search)
     if (searchParams.get('action') === 'share') {
-      const url = searchParams.get('url') || searchParams.get('text') || ''
-      if (url) {
-        useStore.getState().openCreateDialog(url)
+      const sharedUrl = searchParams.get('url') || ''
+      const sharedText = searchParams.get('text') || ''
+      const sharedTitle = searchParams.get('title') || ''
+
+      // Try to extract a URL: prefer explicit url param, then look for URL in text
+      let finalUrl = sharedUrl.trim()
+      if (!finalUrl && sharedText) {
+        // Try to find a URL in the shared text
+        const urlMatch = sharedText.match(/https?:\/\/[^\s]+/i)
+        if (urlMatch) {
+          finalUrl = urlMatch[0]
+        } else {
+          // Maybe the entire text is a URL without protocol
+          finalUrl = sharedText.trim()
+        }
       }
-      
+
+      if (finalUrl) {
+        useStore.getState().openCreateDialog(finalUrl)
+      }
+
+      // Clean up the URL bar
       const urlObj = new URL(window.location.href)
       urlObj.searchParams.delete('action')
       urlObj.searchParams.delete('url')

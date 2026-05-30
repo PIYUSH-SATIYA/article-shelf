@@ -1,4 +1,4 @@
-import { Save, Tag, X } from 'lucide-react'
+import { Plus, Save, Tag, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useArticle, useCreateArticle, useUpdateArticle } from '@/hooks/use-articles'
 import { useStore } from '@/store'
@@ -230,7 +230,28 @@ export function ArticleDialog() {
                 type="text"
                 value={form.tagInput}
                 placeholder={form.tags.length === 0 ? 'Type + Enter to add…' : ''}
-                onChange={(e) => setForm((p) => ({ ...p, tagInput: e.target.value }))}
+                onChange={(e) => {
+                  const val = e.target.value
+                  // Detect comma typed via mobile keyboard (which may not fire keydown)
+                  if (val.includes(',')) {
+                    const parts = val.split(',')
+                    parts.forEach((part, i) => {
+                      const trimmed = part.trim().toLowerCase()
+                      if (trimmed && i < parts.length - 1) {
+                        // Add each completed tag (before the last comma)
+                        setForm((p) => {
+                          if (p.tags.includes(trimmed)) return p
+                          return { ...p, tags: [...p.tags, trimmed] }
+                        })
+                        setDirty(true)
+                      }
+                    })
+                    // Keep whatever is after the last comma as the current input
+                    setForm((p) => ({ ...p, tagInput: parts[parts.length - 1] }))
+                  } else {
+                    setForm((p) => ({ ...p, tagInput: val }))
+                  }
+                }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addTag() }
                   if (e.key === 'Backspace' && !form.tagInput && form.tags.length > 0) {
@@ -242,6 +263,11 @@ export function ArticleDialog() {
                   color: 'var(--text-1)', fontSize: 12, fontFamily: 'var(--font-mono)', outline: 'none',
                 }}
               />
+              {form.tagInput.trim() && (
+                <button type="button" className="tag-add-btn" onClick={addTag}>
+                  <Plus size={10} style={{ marginRight: 3 }} /> Add
+                </button>
+              )}
             </div>
           </div>
 

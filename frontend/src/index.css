@@ -1712,6 +1712,11 @@ kbd {
     display: none;
   }
 
+  /* Always show action buttons on mobile (no hover) */
+  .article-row-actions {
+    opacity: 1;
+  }
+
   .dialog-panel {
     max-height: 95vh;
     border-radius: var(--r-lg) var(--r-lg) 0 0;
@@ -1745,4 +1750,28 @@ kbd {
     font-size: 11px;
     padding: 8px 10px;
   }
+}
+
+/* Tag add button (visible helper for mobile) */
+.tag-add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 3px 10px;
+  background: var(--amber-dim);
+  border: 1px solid var(--amber);
+  border-radius: var(--r-xs);
+  color: var(--amber-text);
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  cursor: pointer;
+  transition: background .1s, border-color .1s;
+  white-space: nowrap;
+}
+
+.tag-add-btn:hover {
+  background: var(--amber);
+  color: #0B0B0B;
 }
