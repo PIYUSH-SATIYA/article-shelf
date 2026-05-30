@@ -152,7 +152,7 @@ export default function App() {
           <div style={{ flex: 1 }} />
           <button
             className="mobile-menu-btn"
-            onClick={openCreateDialog}
+            onClick={() => openCreateDialog()}
             aria-label="New article"
             title="New article (N)"
           >

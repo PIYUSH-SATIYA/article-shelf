@@ -60,7 +60,7 @@ export function QuickAdd() {
 
       <button
         type="button"
-        onClick={openCreateDialog}
+        onClick={() => openCreateDialog()}
         title="Add article with details (N)"
         className="btn-new"
       >
