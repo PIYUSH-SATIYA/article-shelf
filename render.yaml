@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: shelf-backend
+    env: python
+    # We use pip to install the package defined in backend/pyproject.toml
+    buildCommand: "cd backend && pip install -e ."
+    # Render binds the port to the $PORT env variable
+    startCommand: "cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: DATABASE_URL
+        value: sqlite:////data/shelf.db
+      - key: PYTHON_VERSION
+        value: 3.12.0
+    disk:
+      name: shelf-data
+      mountPath: /data
+      sizeGB: 1
