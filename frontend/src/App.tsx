@@ -1,4 +1,4 @@
-import { useEffect, useDeferredValue, useMemo, useState } from 'react'
+import { useEffect, useDeferredValue, useMemo, useRef, useState } from 'react'
 import { useStore } from '@/store'
 import { useArticles } from '@/hooks/use-articles'
 import { Sidebar }         from '@/components/sidebar'
@@ -32,6 +32,21 @@ export default function App() {
 
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
+  // Capture share params EAGERLY (before any effects can modify the URL)
+  const initialShareParams = useRef(() => {
+    const sp = new URLSearchParams(window.location.search)
+    if (sp.get('action') !== 'share') return null
+    const sharedUrl = sp.get('url') || ''
+    const sharedText = sp.get('text') || ''
+    let finalUrl = sharedUrl.trim()
+    if (!finalUrl && sharedText) {
+      const urlMatch = sharedText.match(/https?:\/\/[^\s]+/i)
+      finalUrl = urlMatch ? urlMatch[0] : sharedText.trim()
+    }
+    return finalUrl || null
+  })
+  const shareUrl = useRef<string | null>(typeof initialShareParams.current === 'function' ? initialShareParams.current() : null)
+
   const deferredSearch = useDeferredValue(search)
 
   const params: ListParams = useMemo(() => ({
@@ -62,37 +77,12 @@ export default function App() {
     window.history.replaceState(null, '', str ? `?${str}` : window.location.pathname)
   }, [deferredSearch, status, priority, tag, sortBy, order, limit, page])
 
-  // Handle PWA Web Share Target
+  // Handle PWA Web Share Target (uses pre-captured params from ref)
   useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search)
-    if (searchParams.get('action') === 'share') {
-      const sharedUrl = searchParams.get('url') || ''
-      const sharedText = searchParams.get('text') || ''
-
-      // Try to extract a URL: prefer explicit url param, then look for URL in text
-      let finalUrl = sharedUrl.trim()
-      if (!finalUrl && sharedText) {
-        // Try to find a URL in the shared text
-        const urlMatch = sharedText.match(/https?:\/\/[^\s]+/i)
-        if (urlMatch) {
-          finalUrl = urlMatch[0]
-        } else {
-          // Maybe the entire text is a URL without protocol
-          finalUrl = sharedText.trim()
-        }
-      }
-
-      if (finalUrl) {
-        useStore.getState().openCreateDialog(finalUrl)
-      }
-
-      // Clean up the URL bar
-      const urlObj = new URL(window.location.href)
-      urlObj.searchParams.delete('action')
-      urlObj.searchParams.delete('url')
-      urlObj.searchParams.delete('text')
-      urlObj.searchParams.delete('title')
-      window.history.replaceState(null, '', urlObj.search ? `?${urlObj.searchParams.toString()}` : window.location.pathname)
+    const url = shareUrl.current
+    if (url) {
+      shareUrl.current = null // consume it
+      useStore.getState().openCreateDialog(url)
     }
   }, [])
 
