@@ -17,8 +17,8 @@ const getInitialFromURL = () => {
     status:   q.get('status') ?? '',
     priority: q.get('priority') ?? '',
     tag:      q.get('tag') ?? '',
-    sortBy:   (SORT_FIELDS.includes(sortBy ?? '') ? sortBy : 'created_at') as SortField,
-    order:    (['asc', 'desc'].includes(order ?? '') ? order : 'desc') as SortOrder,
+    sortBy:   (SORT_FIELDS.includes(sortBy ?? '') ? sortBy : 'priority') as SortField,
+    order:    (['asc', 'desc'].includes(order ?? '') ? order : 'asc') as SortOrder,
     limit:    Number.isFinite(limit) && limit > 0 ? limit : 25,
     page:     Number.isFinite(page) && page >= 0 ? page : 0,
   }
@@ -108,8 +108,8 @@ export const useStore = create<UIStore>((set) => ({
   status:   initial.status   ?? '',
   priority: initial.priority ?? '',
   tag:      initial.tag      ?? '',
-  sortBy:   initial.sortBy   ?? 'created_at',
-  order:    initial.order    ?? 'desc',
+  sortBy:   initial.sortBy   ?? 'priority',
+  order:    initial.order    ?? 'asc',
   limit:    initial.limit    ?? 25,
   page:     initial.page     ?? 0,
 
